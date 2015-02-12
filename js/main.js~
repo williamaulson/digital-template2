@@ -1,23 +1,15 @@
 window.onload = function()
 {
-    // You might want to start with a template that uses GameStates:
-    //     https://github.com/photonstorm/phaser/tree/master/resources/Project%20Templates/Basic
-    
-    // You can copy-and-paste the code from any of the examples at http://examples.phaser.io here.
-    // You will need to change the fourth parameter to "new Phaser.Game()" from
-    // 'phaser-example' to 'game', which is the id of the HTML element where we
-    // want the game to go.
-    // The assets (and code) can be found at: https://github.com/photonstorm/phaser/tree/master/examples/assets
-    // You will need to change the paths you pass to "game.load.image()" or any other
-    // loading functions to reflect where you are putting the assets.
-    // All loading functions will typically all be found inside "preload()".
+    // William Aulson
+    // CS 325 Digital Assignment #2
+    // Heart Saver Deluxe
     
     "use strict";
     
     var game = new Phaser.Game( 1024, 576, Phaser.AUTO, 'game', { preload: preload, create: create, update: update, render: render} );
    
  
-    function preload()
+    function preload() // load assets
     {
     	    game.load.image( 'back', 'assets/back.png' );
     	    game.load.image( 'ground', 'assets/ground.png' );
@@ -34,9 +26,21 @@ window.onload = function()
     	    game.load.image( 'kill2', 'assets/kill2.png' );
     	    game.load.image( 'heart', 'assets/heart.png' );
     	    game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+    	    game.load.image( 'back2', 'assets/back2.png' );
+    	    game.load.image( 'back3', 'assets/back3.png' );
+    	    game.load.image( 'fore', 'assets/fore.png' );
+    	    game.load.audio('floating', 'assets/float.mp3');
+    	    game.load.audio('heartBell', 'assets/bell.mp3');
+    	    game.load.audio('reed', 'assets/reed.mp3');
     }
-    
+    // variables, still global, much shame
+    var reed;
+    var floating;
+    var heartBell;
     var back;
+    var back2;
+    var back3;
+    var fore;
     var ground;
     var spawn1;
     var spawn2;
@@ -55,14 +59,12 @@ window.onload = function()
     var loop;
     var spawnGroup;
     var spawnPlat;
-    //var killFront;
     var killBack;
     var killFloor;
     var xOffset = 0;
     var heart;
     var freezeHeartGroup;
     var heartGroup;
-    //var freezeHeart;
     var newHeart;
     var heartTimer = 1;
     var player;
@@ -79,9 +81,12 @@ window.onload = function()
     
     function create()
     {
-    	    game.physics.startSystem(Phaser.Physics.ARCADE);
+    	    game.physics.startSystem(Phaser.Physics.ARCADE); // set up scrolling backgrounds
     	    game.world.setBounds(0, 0, 1024, 576);
     	    back = game.add.tileSprite(0, -736, 2048, 2048, 'back');
+    	    back2 = game.add.tileSprite(0, -736, 2048, 2048, 'back2');
+    	    back3 = game.add.tileSprite(0, -736, 2048, 2048, 'back3');
+    	    back3.alpha = .1;
     	    ground = game.add.tileSprite(0, 536, 2048, 40, 'ground');
     	    game.physics.arcade.enable(ground);
     	    ground.body.allowGravity = false;
@@ -95,40 +100,29 @@ window.onload = function()
     	    killFloor.body.allowGravity = false;
     	    killFloor.body.immovable = true;
     	    
-    	    player = game.add.sprite(50, 450, 'dude');
+    	    player = game.add.sprite(50, 450, 'dude'); // set up player character
     	    game.physics.arcade.enable(player);
-    	    player.body.gravity.y = 275;
+    	    player.body.gravity.y = 300;
     	    player.body.collideWorldBounds = true;
     	    player.animations.add('left', [0, 1, 2, 3], 10, true);
     	    player.animations.add('right', [5, 6, 7, 8], 10, true);
 
     	    cursors = game.input.keyboard.createCursorKeys();
 
-    	    
-    	    
-    	    //makeHeart();
-    	    //makeHeart();
-    	    //makeHeart();
-    	    
-    	    
-    	    
-    	    spawnGroup = game.add.group();
+    	    spawnGroup = game.add.group(); //set up groups
     	    game.physics.arcade.enable(spawnGroup);
     	    heartGroup = game.add.group();
     	    game.physics.arcade.enable(heartGroup);
     	    freezeHeartGroup = game.add.group();
     	    game.physics.arcade.enable(freezeHeartGroup);
+    	    fore = game.add.tileSprite(0, -736, 2048, 2048, 'fore');
+    	    fore.alpha = .3;
     	    
-    	    //game.physics.arcade.enable(spawnGroup);
-    	    
-    	    //grass = game.add.sprite(0, 400, 'grass');
-    	    //game.physics.arcade.enable(grass);
-    	        	   
-    	    for (loop = 1; loop < 10; loop = loop + 1)
+    	    for (loop = 1; loop < 10; loop = loop + 1) //Store assets for random calls
     	    {
     	    	    spawnKey[loop] = 'spawn' + loop;
     	    }
-    	    
+    	    // Collect heart text database
     	    textDict[0] = 'love';
     	    textDict[1] = 'peace';
     	    textDict[2] = 'hope';
@@ -151,10 +145,17 @@ window.onload = function()
     	    textDict[19] = 'cookies';
     	    
     	    game.physics.arcade.gravity.y = 100;
-    	    
+    	    // set up HUD
     	    statusText = game.add.text(15, 10, 'Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost, statusStyle);
-    	    //statusText.anchor.set(0.5);
-    	        	    
+    	    // set up audio
+    	    floating = game.add.audio('floating');
+    	    floating.allowMultiple = true;
+    	    heartBell = game.add.audio('heartBell');
+    	    heartBell.allowMultiple = true;
+    	    
+    	    reed = game.add.audio('reed');
+    	    reed.play('',0,1,true);
+    	    // set up full screen and game start  	    
     	    game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
     	    game.input.onDown.add(fullScreenStart, this);
     	    game.paused = true;
@@ -162,7 +163,7 @@ window.onload = function()
     	    
 
     }
-    
+    // full screen method and game pausing
     function fullScreenStart()
     {
     	    if (game.scale.isFullScreen)
@@ -176,28 +177,24 @@ window.onload = function()
     	    	    game.paused = false;
     	    }
     }
-    
+    // heartbeat functions, checks, and assignments
     function update()
     {
     	    if (heartTimer === 1)
     	    {
     	    	    heartTimer = 0;
     	    	    makeHeart();
-    	    	    //heartTimer = 0;
+    	    	 
     	    }
-    	    
+    	    // scroll assets
     	    xOffset = xOffset + 4;
-    	    back.tilePosition.x = back.tilePosition.x - 0.2;
+    	    back.tilePosition.x = back.tilePosition.x - .2;
+    	    back2.tilePosition.x = back2.tilePosition.x - .6;
+    	    back3.tilePosition.x = back3.tilePosition.x - 1;
     	    ground.tilePosition.x = ground.tilePosition.x - 4;
+    	    fore.tilePosition.x = fore.tilePosition.x - 4.5;
     	    spawnGroup.x = spawnGroup.x - 4;
-    	    //if (newHeartLive > 0)
-    	    //{
-    	    //	 freezeHeartGroup.x = freezeHeartGroup.x - 4;   
-    	   // }
-    	    //newHeart.x = newHeart.x - 2;
-    	    
-    	    //console.log('hello');
-    	    //spawnCountHigh = 1;
+    	    // check for collisions
     	    game.physics.arcade.collide(player, ground, null, null, this);
     	    game.physics.arcade.collide(player, spawnGroup, null, null, this);
     	    game.physics.arcade.overlap(player, heartGroup, playerHeart, null, this);
@@ -211,74 +208,70 @@ window.onload = function()
     	    game.physics.arcade.overlap(freezeHeartGroup, killBack, freezeHeartKillWall, null, this);
     	    game.physics.arcade.overlap(heartGroup, killFloor, heartKillFloor, null, this);
     	    game.physics.arcade.overlap(freezeHeartGroup, killFloor, freezeHeartKillFloor, null, this);
+    	    //spawn platforms
     	    if (spawnCountCeiling > 0)
     	    {
     	    	    spawnCountCeiling = -1;
-    	    	    //console.log("hi");
-    	    	    //spawnPlat = game.add.sprite(1000, 350, getSpawnKey());
+    	    	
     	    	    spawnPlat = spawnGroup.create((xOffset + 1030), 125, getSpawnKey());
-    	    	    //grass = game.add.sprite(0, 400, 'grass');
+    	    	
     	    	    game.physics.arcade.enable(spawnPlat);
     	    	    spawnPlat.body.allowGravity = false;
     	    	    spawnPlat.body.immovable = true; 
     	    	    game.time.events.add(Phaser.Timer.SECOND * 1.5, spawnCeilingReset, null);
-    	    	    //musicBubble = spawnGroup.create(3500, 350, getSpawnKey());
+    	    	
     	    }
     	    
     	    if (spawnCountHigh > 0)
     	    {
     	    	    spawnCountHigh = -1;
-    	    	    //console.log("hi");
-    	    	    //spawnPlat = game.add.sprite(1000, 350, getSpawnKey());
+    	    	  
     	    	    spawnPlat = spawnGroup.create((xOffset + 1030), 225, getSpawnKey());
-    	    	    //grass = game.add.sprite(0, 400, 'grass');
+    	    	
     	    	    game.physics.arcade.enable(spawnPlat);
     	    	    spawnPlat.body.allowGravity = false;
     	    	    spawnPlat.body.immovable = true; 
     	    	    game.time.events.add(Phaser.Timer.SECOND * 1.5, spawnHighReset, null);
-    	    	    //musicBubble = spawnGroup.create(3500, 350, getSpawnKey());
+    	    	
     	    }
-    	    //spawnCountMed = 1;
-    	    //game.physics.arcade.overlap(spawnGroup, killFront, setSpawnHigh(), null, this);
+   
     	    if (spawnCountMed > 0)
     	    {
     	    	    spawnCountMed = -1;
-    	    	    //console.log("hi");
-    	    	    //spawnPlat = game.add.sprite(1000, 350, getSpawnKey());
+    	    	
     	    	    spawnPlat = spawnGroup.create((xOffset + 1030), 325, getSpawnKey());
-    	    	    //grass = game.add.sprite(0, 400, 'grass');
+    	    	  
     	    	    game.physics.arcade.enable(spawnPlat);
-    	    	    //spawnPlat.alpha = .2;
+    	    	
     	    	    spawnPlat.body.allowGravity = false;
     	    	    spawnPlat.body.immovable = true; 
     	    	    game.time.events.add(Phaser.Timer.SECOND * 1.5, spawnMedReset, null);
-    	    	    //musicBubble = spawnGroup.create(3500, 350, getSpawnKey());
+    	    	
     	    }
     	    
     	    if (spawnCountLow > 0)
     	    {
-    	    	    //console.log('hello');
+    	    	
     	    	    spawnCountLow = -1;
-    	    	    //console.log("hi");
-    	    	    //spawnPlat = game.add.sprite(1000, 350, getSpawnKey());
+    	    	  
     	    	    spawnPlat = spawnGroup.create((xOffset + 1030), 425, getSpawnKey());
-    	    	    //grass = game.add.sprite(0, 400, 'grass');
+    	    	   
     	    	    game.physics.arcade.enable(spawnPlat);
     	    	    spawnPlat.body.allowGravity = false;
     	    	    spawnPlat.body.immovable = true; 
     	    	    game.time.events.add(Phaser.Timer.SECOND * 1.5, spawnLowReset, null);
-    	    	    //musicBubble = spawnGroup.create(3500, 350, getSpawnKey());
+    	    	  
     	    }
-    	    
+    	    // player movement inputs
     	    player.body.velocity.x = 0;
     	    if (cursors.left.isDown)
     	    {
-    	    	    player.body.velocity.x = -150;
+    	    	    player.body.velocity.x = -200;
     	    	    player.animations.play('left');
     	    }
     	    else if (cursors.right.isDown)
     	    {
-    	    	    player.body.velocity.x = 150;
+    	    	    player.body.velocity.x = 200;
     	    	    player.animations.play('right');
     	    }
     	    else
@@ -288,43 +281,23 @@ window.onload = function()
     	    }
     	    if (cursors.up.isDown && player.body.touching.down)
     	    {
-    	    	    player.body.velocity.y = -350;
+    	    	    player.body.velocity.y = -450;
     	    }
 
        
     }
-    
+    // debug info
     function render()
     {
     	    //game.debug.cameraInfo(game.camera, 500, 32);
     	    //game.debug.spriteCoords(game.camera, 32, 32);
     }
-    
+    // return random platform asset
     function getSpawnKey()
     {
     	    return ('spawn' + game.rnd.integerInRange(1, 9));
     }
-    
-    function getYSpawnHigh()
-    {
-    	    return game.rnd.integerInRange(225, 225);
-    }
-    
-    function getYSpawnHigh()
-    {
-    	    return game.rnd.integerInRange(225, 225);
-    }
-    
-    function getYSpawnMed()
-    {
-    	    return game.rnd.integerInRange(325, 325);
-    }
-    
-    function getYSpawnLow()
-    {
-    	    return game.rnd.integerInRange(425, 425);
-    }
-    
+    // choose random platform other than low   
     function spawnLowReset()
     {
     	    var choiceLow = game.rnd.integerInRange(1, 3);
@@ -341,7 +314,7 @@ window.onload = function()
     	    	    spawnCountMed = 1;
     	    }
     }
-    
+    // choose random platform other than med 
     function spawnMedReset()
     {
     	    var choiceMed = game.rnd.integerInRange(1, 3);
@@ -358,7 +331,7 @@ window.onload = function()
     	    	    spawnCountLow = 1;
     	    }
     }
-    
+    // choose random platform other than high 
     function spawnHighReset()
     {
     	    var choiceHigh = game.rnd.integerInRange(1, 3);
@@ -375,7 +348,7 @@ window.onload = function()
     	    	    spawnCountLow = 1;
     	    }
     }
-    
+    // choose random platform other than ceiling 
     function spawnCeilingReset()
     {
     	    var choiceCeiling = game.rnd.integerInRange(1, 3);
@@ -392,112 +365,105 @@ window.onload = function()
     	    	    spawnCountLow = 1;
     	    }
     }
-    
+    // destroy platforms offscreen
     function murderSpawn(killBack, spawnPlat)
     {
 	spawnPlat.destroy();
-	//heartLost = heartLost + 1;
-    	  //  statusText.setText('Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost);
-	//currentBubbles = currentBubbles - 1;
-	//noteArray[rollingIndex] = game.add.audio('blank');
-	//rollingIndex = rollingIndex + 1;
-	//pop.play(); //Possible bug!! Pop sounds may not play or only playing sound fragment.
+	
     }
-
+    // spawn new heart on platform
     function freezeHeart(spawnPlat, heart)
     {
     	    newHeart = freezeHeartGroup.create(heart.x, heart.y, 'heart');
     	    game.physics.arcade.enable(newHeart);
     	    newHeart.body.velocity.x = -240;
     	    heart.destroy();
-    	    //newHeartLive = newHeartLive + 1;
-    	    //heart.body.immovable = true;
+    	
     }
-    
+    // spawn new heart on ground
     function freezeHeartGround(ground, heart)
     {
     	    newHeart = freezeHeartGroup.create(heart.x, heart.y, 'heart');
     	    game.physics.arcade.enable(newHeart);
     	    newHeart.body.velocity.x = -240;
     	    heart.destroy();
-    	    //newHeartLive = newHeartLive + 1;
-    	    //heart.body.immovable = true;
-    }
     
+    }
+    // spawn falling hearts
     function makeHeart()
     {
-    	    //heartTimer = 0;
-    	    //heart = heartGroup.create(1000, 5, 'heart');
-    	    //heart = game.add.sprite(1000, 5, 'heart');
+    	
     	    heart = heartGroup.create((/*xOffset +*/ game.rnd.integerInRange(600, 1050)), game.rnd.integerInRange(-10, -5), 'heart');
     	    game.physics.arcade.enable(heart);
     	    game.add.tween(heart).to({x: (heart.x + 30)}, 400, Phaser.Easing.Linear.NONE, true, 0, 20, true);
     	    game.time.events.add(Phaser.Timer.SECOND * 2, heartTimerReset, null);
     }
-    
+    // keep update from spamming hearts
     function heartTimerReset()
     {
     	    heartTimer = 1;
     }
-    
+    // remove any missed hearts that are offscreen
     function heartKillWall(killBack, heart)
     {
     	    heart.destroy();
     	    heartLost = heartLost + 1;
     	    statusText.setText('Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost);
     }
-    
+    // remove any missed hearts that are offscreen
     function freezeHeartKillWall(killBack, newHeart)
     {
     	    newHeart.destroy();
     	    heartLost = heartLost + 1;
     	    statusText.setText('Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost);
     }
-    
+    // remove any missed hearts that are offscreen
     function heartKillFloor(killFloor, heart)
     {
     	    heart.destroy();
     	    heartLost = heartLost + 1;
     	    statusText.setText('Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost);
     }
-    
+    // remove any missed hearts that are offscreen
     function freezeHeartKillFloor(killFloor, newHeart)
     {
     	    newHeart.destroy();
     	    heartLost = heartLost + 1;
     	    statusText.setText('Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost);
     }
-    
+    // remove falling hearts collected by player
     function playerHeart(player, heart)
     {
+    	    floating.play('', .2, .3);
     	    heartText = game.add.text(heart.x, heart.y, getText(), style);
     	    heartText.anchor.set(0.5);
-    	    game.time.events.add(Phaser.Timer.SECOND * .4, killHeartText, null);
+    	    game.time.events.add(Phaser.Timer.SECOND * .3, killHeartText, null);
     	    heart.destroy();
     	    floatHeartSaved = floatHeartSaved + 1;
     	    statusText.setText('Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost);
     }
-    
+    // remove hearts collected by player
     function playerFreezeHeart(player, newHeart)
     {
+    	    heartBell.play();
     	    freezeHeartText = game.add.text(newHeart.x, newHeart.y, getText(), style);
     	    freezeHeartText.anchor.set(0.5);
-    	    game.time.events.add(Phaser.Timer.SECOND * .4, killFreezeText, null);
+    	    game.time.events.add(Phaser.Timer.SECOND * .3, killFreezeText, null);
     	    newHeart.destroy();
     	    heartSaved = heartSaved + 1;
     	    statusText.setText('Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost);
     }
-    
+    // remove heart text
     function killFreezeText()
     {
     	    freezeHeartText.destroy();
     }
-    
+    // remove falling heart text
     function killHeartText()
     {
     	    heartText.destroy();
     }
-    
+    // choose random heart collection text
     function getText()
     {
     	    var textNum = game.rnd.integerInRange(0, 19);

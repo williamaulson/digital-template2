@@ -41,11 +41,11 @@ Casual collection non-offensive genre.
 
 <li><strong>Game play:</strong>
 Players use the left and right arrow keys to move their avatar left and right respectively. The up arrow key causes the avatar to jump. Press the up and left or right arrow keys together to jump in a direction.
-Traverse the moving platforms to collect as many hearts as you can. Hearts you are unable to collect are added to your 'hearts lost' total. Try and keep your collected hearts and falling hearts greater than the hearts you have lost!
+Traverse the moving platforms to collect as many hearts as you can. Hearts you are unable to collect are added to your 'hearts lost' total. Try and keep your collected hearts and falling hearts greater than the hearts you hvae lost!
 </li>
 
 <li><strong>Prototype goal:</strong>
-Players learn to manipulate the game's jumping and falling physics while interacting with moving objects to continuously collect items.
+Players learn to manipulate the game's jumping and falling physics while interacting with moving onjects to continuously collect items.
 </li>
 
 <li><strong>Features:</strong>
@@ -53,15 +53,15 @@ An above average level of cuteness. Many, many hearts to collect. Inspirational 
 </li>
 
 <li><strong>Setting/Premise:</strong>
-The gameworld is a manifestation of the life cycle of the dreams and hopes of people everywhere. Hearts represent a person's desires, or happiness, or goals in life. The clouds, flowers, trees, bushes, and grasses symbolize the natural world in which we all exist.
+The gameworld is a manifestation of the lifecycle of the dreams and hopes of people everywhere. Hearts represent a person's desires, or happiness, or goals in life. The clouds, flowers, trees, bushes, and grasses symbolize the natural world in which we all exist.
 </li>
 
 <li><strong>Story:</strong>
-You are a genderless, mute, ethereal creature that is tasked with collecting as many hearts as possible. Each heart you collect ensures the existence of its contents. If you fail to collect a heart the owner of its contents is doomed to be forever miserable and alone. No pressure. 
+You are a genderless, mute, etheral creature that is tasked with collecting as many hearts as possible. Each heart you collect ensures the existence of its contents. If you fail to collect a heart the owner of its contents is doomed to be forever miserable and alone. No pressure. 
 </li>
 
 <li><strong>Target Audience:</strong>
-Anyone and everyone who likes collecting things. Not for people who don't like hearts, collecting things, colorful things, and attempts at wish fulfillment.
+Anyone and everyone who likes collecting things. Not for people who don't like hearts, collecting things, colorful things, and attempts at wish fullfillment.
 </li>
 
 <li><strong>Play time:</strong>
@@ -77,7 +77,7 @@ Sounds effects are public domain from SoundBible. Music is public domain Creativ
 </li>
 
 <li><strong>Prototype Closest Other Game:</strong>
-Phaser example Invaders and Phaser tutorial Make Your First Game in Phaser were primary sources. Code was also taken from Phaser Digital Assignment #2. This game was influenced by games that were side-scrollers with parallax backgrounds.
+Phaser example Invaders and Phaser tutorial Make Your First Game in Phaser were primary sources. Code was also taken from Phaser Digital Assignment #2. This game was influenced by games that were side-scrollers with parallax backgrunds.
 </li>
 
 </ul>
