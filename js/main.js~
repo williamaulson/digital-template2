@@ -34,21 +34,9 @@ window.onload = function()
     	    game.load.image( 'kill2', 'assets/kill2.png' );
     	    game.load.image( 'heart', 'assets/heart.png' );
     	    game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
-    	    game.load.image( 'back2', 'assets/back2.png' );
-    	    game.load.image( 'back3', 'assets/back3.png' );
-    	    game.load.image( 'fore', 'assets/fore.png' );
-    	    game.load.audio('floating', 'assets/float.mp3');
-    	    game.load.audio('heartBell', 'assets/bell.mp3');
-    	    game.load.audio('reed', 'assets/reed.mp3');
     }
     
-    var reed;
-    var floating;
-    var heartBell;
     var back;
-    var back2;
-    var back3;
-    var fore;
     var ground;
     var spawn1;
     var spawn2;
@@ -94,9 +82,6 @@ window.onload = function()
     	    game.physics.startSystem(Phaser.Physics.ARCADE);
     	    game.world.setBounds(0, 0, 1024, 576);
     	    back = game.add.tileSprite(0, -736, 2048, 2048, 'back');
-    	    back2 = game.add.tileSprite(0, -736, 2048, 2048, 'back2');
-    	    back3 = game.add.tileSprite(0, -736, 2048, 2048, 'back3');
-    	    back3.alpha = .1;
     	    ground = game.add.tileSprite(0, 536, 2048, 40, 'ground');
     	    game.physics.arcade.enable(ground);
     	    ground.body.allowGravity = false;
@@ -112,7 +97,7 @@ window.onload = function()
     	    
     	    player = game.add.sprite(50, 450, 'dude');
     	    game.physics.arcade.enable(player);
-    	    player.body.gravity.y = 300;
+    	    player.body.gravity.y = 275;
     	    player.body.collideWorldBounds = true;
     	    player.animations.add('left', [0, 1, 2, 3], 10, true);
     	    player.animations.add('right', [5, 6, 7, 8], 10, true);
@@ -133,8 +118,6 @@ window.onload = function()
     	    game.physics.arcade.enable(heartGroup);
     	    freezeHeartGroup = game.add.group();
     	    game.physics.arcade.enable(freezeHeartGroup);
-    	    fore = game.add.tileSprite(0, -736, 2048, 2048, 'fore');
-    	    fore.alpha = .3;
     	    
     	    //game.physics.arcade.enable(spawnGroup);
     	    
@@ -171,14 +154,6 @@ window.onload = function()
     	    
     	    statusText = game.add.text(15, 10, 'Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost, statusStyle);
     	    //statusText.anchor.set(0.5);
-    	    
-    	    floating = game.add.audio('floating');
-    	    floating.allowMultiple = true;
-    	    heartBell = game.add.audio('heartBell');
-    	    heartBell.allowMultiple = true;
-    	    
-    	    reed = game.add.audio('reed');
-    	    reed.play('',0,1,true);
     	        	    
     	    game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
     	    game.input.onDown.add(fullScreenStart, this);
@@ -212,11 +187,8 @@ window.onload = function()
     	    }
     	    
     	    xOffset = xOffset + 4;
-    	    back.tilePosition.x = back.tilePosition.x - .2;
-    	    back2.tilePosition.x = back2.tilePosition.x - .6;
-    	    back3.tilePosition.x = back3.tilePosition.x - 1;
+    	    back.tilePosition.x = back.tilePosition.x - 0.2;
     	    ground.tilePosition.x = ground.tilePosition.x - 4;
-    	    fore.tilePosition.x = fore.tilePosition.x - 4.5;
     	    spawnGroup.x = spawnGroup.x - 4;
     	    //if (newHeartLive > 0)
     	    //{
@@ -301,12 +273,12 @@ window.onload = function()
     	    player.body.velocity.x = 0;
     	    if (cursors.left.isDown)
     	    {
-    	    	    player.body.velocity.x = -200;
+    	    	    player.body.velocity.x = -150;
     	    	    player.animations.play('left');
     	    }
     	    else if (cursors.right.isDown)
     	    {
-    	    	    player.body.velocity.x = 200;
+    	    	    player.body.velocity.x = 150;
     	    	    player.animations.play('right');
     	    }
     	    else
@@ -316,7 +288,7 @@ window.onload = function()
     	    }
     	    if (cursors.up.isDown && player.body.touching.down)
     	    {
-    	    	    player.body.velocity.y = -450;
+    	    	    player.body.velocity.y = -350;
     	    }
 
        
@@ -498,10 +470,9 @@ window.onload = function()
     
     function playerHeart(player, heart)
     {
-    	    floating.play('', .2, .3);
     	    heartText = game.add.text(heart.x, heart.y, getText(), style);
     	    heartText.anchor.set(0.5);
-    	    game.time.events.add(Phaser.Timer.SECOND * .3, killHeartText, null);
+    	    game.time.events.add(Phaser.Timer.SECOND * .4, killHeartText, null);
     	    heart.destroy();
     	    floatHeartSaved = floatHeartSaved + 1;
     	    statusText.setText('Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost);
@@ -509,10 +480,9 @@ window.onload = function()
     
     function playerFreezeHeart(player, newHeart)
     {
-    	    heartBell.play();
     	    freezeHeartText = game.add.text(newHeart.x, newHeart.y, getText(), style);
     	    freezeHeartText.anchor.set(0.5);
-    	    game.time.events.add(Phaser.Timer.SECOND * .3, killFreezeText, null);
+    	    game.time.events.add(Phaser.Timer.SECOND * .4, killFreezeText, null);
     	    newHeart.destroy();
     	    heartSaved = heartSaved + 1;
     	    statusText.setText('Hearts Saved: ' + heartSaved + '  Floating Hearts Saved: ' + floatHeartSaved + '  Hearts Lost: ' + heartLost);
